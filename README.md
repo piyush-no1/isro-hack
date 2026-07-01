@@ -16,7 +16,6 @@ README.md
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-2.x-red.svg)
 ![Deep Learning](https://img.shields.io/badge/DeepLearning-SuperSloMo-orange.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 *A dual-output deep learning pipeline that generates intermediate satellite frames while preserving scientific integrity for research and producing visually enhanced imagery for human interpretation.*
 
