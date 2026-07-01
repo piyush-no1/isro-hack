@@ -267,42 +267,6 @@ The generated frame is exported directly.
 
 ---
 
-# 📁 Repository Structure
-
-```text
-.
-├── dataset/
-│   ├── GOES19/
-│   └── INSAT3DS/
-│
-├── preprocessing/
-│   ├── normalization.py
-│   ├── dead_line_repair.py
-│   └── brightness_temperature.py
-│
-├── networks/
-│   ├── slomo.py
-│   ├── residual_unet.py
-│   └── losses.py
-│
-├── inference/
-│
-├── evaluation/
-│
-├── visualization/
-│
-├── outputs/
-│   ├── scientific/
-│   ├── visual/
-│   └── reports/
-│
-├── train.py
-├── inference.py
-└── README.md
-```
-
----
-
 # 📂 Input Modes
 
 ## Mode 1 — Evaluation
@@ -360,36 +324,6 @@ The pipeline generates:
 - Metadata
 - Climate information
 - Processing logs
-
----
-
-# 💻 Installation
-
-```bash
-git clone https://github.com/username/repository.git
-
-cd repository
-
-pip install -r requirements.txt
-```
-
----
-
-# ▶️ Training
-
-```bash
-python train.py
-```
-
----
-
-# ⚡ Inference
-
-```bash
-python inference.py \
-    --frame1 path/frame1.nc \
-    --frame3 path/frame3.nc
-```
 
 ---
 
