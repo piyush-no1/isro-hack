@@ -8,7 +8,7 @@ import torch.amp as amp
 import torch.nn.functional as F
 import sys
 
-# Import your updated global SSD dataset engine and architecture modules
+
 from goes_dataset import GOES19GlobalDataset
 from networks.slomo import SuperSlomo
 
@@ -23,19 +23,18 @@ class MaskedStructuralLoss(nn.Module):
         self.l1 = nn.L1Loss()
         
     def forward(self, pred, gt, mask, step_info=""):
-        # Enforce masked context immediately
+      
         masked_pred = pred * mask
         masked_gt = gt * mask
         
-        # 1. Compute baseline pixel scaling validation metrics
+      
         l1_loss = self.l1(masked_pred, masked_gt)
         
-        # 2. Check if we have valid active planet pixels in this batch step
+      
         num_active_pixels = torch.sum(mask > 0.5)
         if num_active_pixels == 0:
             return l1_loss
         
-        # 3. Compute Structural Topology preservation matrices
         ux = F.avg_pool2d(masked_pred, 11, stride=1, padding=5)
         uy = F.avg_pool2d(masked_gt, 11, stride=1, padding=5)
         
@@ -54,7 +53,7 @@ class MaskedStructuralLoss(nn.Module):
         num = (2 * ux * uy + c1) * (2 * vxy + c2)
         ssim_map = num / denom
         
-        # --- FORENSIC LOSS CHECKING ---
+
         if torch.isnan(ssim_map).any() or torch.isinf(ssim_map).any():
             print(f"\n\n🚨 [LOSS CRASH] NaN/Inf detected inside SSIM map calculation at {step_info}!")
             print(f"   -> Min/Max Denominator: {denom.min().item():.8f} / {denom.max().item():.8f}")
@@ -91,7 +90,7 @@ def train_global_model():
     BATCH_SIZE = 1  
     LEARNING_RATE = 1e-4
     EPOCHS = 40  # Run up to 40 epochs
-    PATIENCE = 5  # Early stopping threshold
+    PATIENCE = 5 
 
     print("--> Initializing SSD-Backed Global Data Matrix Loader...")
     full_dataset = GOES19GlobalDataset(data_dir=DATA_DIR, target_size=1356)
@@ -110,7 +109,7 @@ def train_global_model():
     criterion_hybrid = MaskedStructuralLoss(alpha=0.84)
     scaler = amp.GradScaler('cuda')
 
-    # --- CHECKPOINT RESTORATION ENGINE ---
+ 
     start_epoch = 1
     best_val_loss = float('inf')
     patience_counter = 0
@@ -118,7 +117,7 @@ def train_global_model():
     print("🔍 Scanning for pre-existing checkpoints...")
     checkpoints = [f for f in os.listdir(CHECKPOINT_DIR) if f.startswith("global_model_epoch_") and f.endswith(".pt")]
     if checkpoints:
-        # Extract epoch numbers and find the latest checkpoint
+       
         epochs_found = [int(f.split("_")[-1].split(".")[0]) for f in checkpoints]
         latest_epoch = max(epochs_found)
         checkpoint_path = os.path.join(CHECKPOINT_DIR, f"global_model_epoch_{latest_epoch}.pt")
@@ -132,9 +131,8 @@ def train_global_model():
     else:
         print("🆕 No checkpoints detected. Starting a clean training pipeline.")
 
-    # --- MAIN OPTIMIZATION LOOP ---
     for epoch in range(start_epoch, EPOCHS + 1):
-        # 1. Training Phase
+     
         model.train()
         running_train_loss = 0.0
         print(f"\n🚀 [Epoch {epoch}/{EPOCHS}] Commencing Optimization Pass...")
@@ -185,7 +183,7 @@ def train_global_model():
         epoch_train_loss = running_train_loss / len(train_loader)
         print(f"\n✨ Epoch [{epoch}/{EPOCHS}] Completed | Average Train Hybrid Loss: {epoch_train_loss:.6f}")
 
-        # 2. Validation Phase (Required for Early Stopping evaluation)
+
         model.eval()
         running_val_loss = 0.0
         print(f"🧪 Evaluating Validation Set Matrix...")
@@ -212,7 +210,7 @@ def train_global_model():
         epoch_val_loss = running_val_loss / len(val_loader) if len(val_loader) > 0 else 0.0
         print(f"📊 Validation Hybrid Loss: {epoch_val_loss:.6f}")
 
-        # 3. Save Checkpoint State Matrix
+    
         checkpoint_path = os.path.join(CHECKPOINT_DIR, f"global_model_epoch_{epoch}.pt")
         torch.save({
             'epoch': epoch,
@@ -223,7 +221,7 @@ def train_global_model():
         }, checkpoint_path)
         print(f"   💾 Checkpoint securely archived to: {checkpoint_path}")
 
-        # 4. Early Stopping Evaluation Engine
+
         if epoch_val_loss < best_val_loss:
             best_val_loss = epoch_val_loss
             patience_counter = 0
@@ -235,7 +233,7 @@ def train_global_model():
                 print(f"\n🛑 [EARLY STOPPING] Validation loss stagnated for {PATIENCE} epochs consecutively. Terminating run execution safely.")
                 break
 
-        # Clean down loop garbage
+    
         del frame_t, frame_t10_gt, frame_t20, roi_mask, output_dict
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
